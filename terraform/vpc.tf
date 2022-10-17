@@ -10,3 +10,7 @@ resource "aws_subnet" "public_subnet" {
     Name = "This is a public subnet"
   }
 }
+
+resource "aws_internet_gateway" "gw" {
+  vpc_id = aws_vpc.myvpc.id
+}
