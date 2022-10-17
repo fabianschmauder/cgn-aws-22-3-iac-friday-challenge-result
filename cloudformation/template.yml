@@ -50,3 +50,43 @@ Resources:
         Ref: publicSubnet
       RouteTableId:
         Ref: publicRouteTable
+  instanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow http and ssh
+      VpcId: 
+        Ref: myVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+  webServer: 
+    Type: AWS::EC2::Instance
+    Properties: 
+      ImageId: ami-08e2d37b6a0129927
+      KeyName: vockey
+      InstanceType: t3.micro
+      NetworkInterfaces: 
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet: 
+            - Ref: instanceSecurityGroup
+          SubnetId: 
+            Ref: publicSubnet
+      UserData:
+        Fn::Base64: 
+          !Sub |
+            #!/bin/bash
+            yum -y install httpd
+            systemctl enable httpd
+            systemctl start httpd
+            curl "https://raw.githubusercontent.com/fabianschmauder/cgn-aws-22-3-friday-challanges/main/22-09-30_S3-CLI-Actions/index.html" > /var/www/html/index.html
+    
